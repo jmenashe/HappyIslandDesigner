@@ -294,43 +294,6 @@
       iconMenu.addChild(item);
       i++;
 	  
-	item.mega_tt = null;
-	// Create onMouseEnter event for def
-	item.onMouseEnter = function(event) {
-		console.log('on mouse enter for me:', this);
-	  // Layout the tooltip above the def
-	  var tt_pos = new Point(10,10);
-	  var tooltipRect = new Rectangle(tt_pos, new Size(200, 25));
-	  // Create tooltip from rectangle
-	  var tooltip = new Path.Rectangle(tooltipRect);
-	  tooltip.fillColor = 'white';
-	  tooltip.strokeColor = 'black';
-	  // Name the tooltip so we can retrieve it later
-	  tooltip.name = 'tooltip';
-	  // Add the tooltip to the parent (group)
-	  this.addChild(tooltip);
-	  
-	  var content = "dave";
-	  var tt_text = new PointText(this.position + new Point(-20, 20));
-	  console.log('this pos:',this.position);
-	  tt_text.justification = 'center';
-	  tt_text.content = 'HERE IS CONTENT',
-	  tt_text.fontSize = 12;
-	  tt_text.fontFamily = 'TTNorms, sans-serif';
-	  tt_text.fillColor = colors.text.color;
-	  tooltip.addChild(tt_text);
-	  item.mega_tt = tooltip;
-	  tooltip.mega_tt = tt_text;
-	}
-
-	// Create onMouseLeave event for def
-	item.onMouseLeave = function(event) {
-		console.log('on mouse leave for me:', this);
-	  // We retrieve the tooltip from its name in the parent node (group) then remove it
-	  //this.children['tooltip'].remove();
-	  item.mega_tt.mega_tt.remove();
-	  item.mega_tt.remove();
-	}
       return item;
     });
 
@@ -345,7 +308,7 @@
         triangle.position += new Point(0, distance);
       }
     };
-
+    objectMap(items, addItemTooltip);
     return iconMenu;
   }
 
@@ -684,6 +647,7 @@
     if (objectDefinition.colorData) {
       item.fillColor = objectDefinition.colorData.color;
     }
+	item.objectDefinition = objectDefinition;
     return item;
   }
 
@@ -1169,6 +1133,75 @@
   // highlightedColor: string
   // selectedColor: string
   // disabledColor: string
+  
+  function addItemTooltip(item) {
+	  console.log('item?', item);
+	  console.log('item obj def?', item.objectDefinition);
+	if(item.objectDefinition == null) 
+		return;
+	var def = item.objectDefinition;
+	console.log('item def toooltip?', def.tooltip);
+	if(def.tooltip == null)
+		return;
+	item.tooltip = null;
+	item.onMouseEnter = function(event) {
+	  // Layout the tooltip above the def
+	  var fontSize = 12;
+	  var tooltipWidth = fontSize * def.tooltip.length;
+	  //tooltipWidth = 200;
+	  var tooltipRect = new Rectangle(new Point(0,0), new Size(tooltipWidth, 25));
+	  // Create tooltip from rectangle
+	  var tooltip = new Path.Rectangle(tooltipRect);
+	  tooltip.fillColor = 'white';
+	  tooltip.strokeColor = 'black';
+	  // Name the tooltip so we can retrieve it later
+	  tooltip.name = 'tooltip';
+	  // Add the tooltip to the parent (group)
+	  //item.parent.addChild(tooltip);
+	  console.log(tooltipRect);
+	  console.log('adding tooltip rect with position',tooltipRect.topLeft,'and size',tooltipRect.size);
+	  
+	  var tooltipText = new PointText(new Point(5, tooltipRect.height / 2));
+	  console.log('button item pos:',item.position);
+	  console.log('button parent pos:',item.parent.position);
+	  console.log('button parent.parent pos:',item.parent.parent.position);
+	  tooltipText.justification = 'left';
+	  tooltipText.content = def.tooltip;
+	  tooltipText.fontSize = 12;
+	  tooltipText.fontFamily = 'TTNorms, sans-serif';
+	  tooltipText.fillColor = colors.text.color;
+	  //tooltip.addChild(tooltipText);
+	  item.tooltip = tooltip;
+	  tooltip.tooltipText = tooltipText;
+	  console.log('adding tooltip',def.tooltip,'at position',item.tooltip.position);
+	  
+		var ttGroup = new Group({
+			children: [tooltip, tooltipText],
+			strokeColor: 'red',
+			applyMatrix: false,
+		});
+		ttGroup.translate([30, 0])
+		//var newLayer = new Layer();
+		//newLayer.activate();    // so that redCircle will be added to newLayer
+		//mapOverlayLayer.activate();
+		item.addChild(ttGroup);
+		ttGroup.bringToFront();
+		//newLayer.remove();      // this prevents the redCircle from being drawn
+		//project.layers.push(newLayer);  // now the redCircle is back
+	}
+	// Create onMouseLeave event for def
+	item.onMouseLeave = function(event) {
+	  if(item.tooltip == null) {
+		return;
+	  }
+	  item.tooltip.remove();
+	  if(item.tooltip.tooltipText == null) {
+		return;
+	  }
+	  item.tooltip.tooltipText.remove();
+	  console.log('removing tooltip:', item.tooltip.tooltipText.content);
+	}
+  }
 
   function createButton(item, buttonSize, onClick, options) {
     var alpha = (!options || options.alpha == null) ? 0.0001 : options.alpha;
@@ -1177,7 +1210,7 @@
     var disabledColor = (!options || options.disabledColor == null) ? null : options.disabledColor;
 
     var group = new Group();
-
+	group.objectDefinition = item.objectDefinition;
     var button = new Path.Circle(0, 0, buttonSize);
 
     group.applyMatrix = false;
@@ -2392,31 +2425,40 @@
   asyncTreeDefinition.value = {
     tree: {
       img: 'sprite/tree/tree.png',
+	  tooltip: 'Basic Tree',
     },
     treeApple: {
       img: 'sprite/tree/tree-apple.png',
+	  tooltip: 'Apple Tree',
     },
     treeCherry: {
       img: 'sprite/tree/tree-cherry.png',
+	  tooltip: 'Cherry Tree',
     },
     treeOrange: {
       img: 'sprite/tree/tree-orange.png',
+	  tooltip: 'Orange Tree',
     },
     treePear: {
       img: 'sprite/tree/tree-pear.png',
+	  tooltip: 'Pear Tree',
     },
     treePeach: {
       img: 'sprite/tree/tree-peach.png',
+	  tooltip: 'Peach Tree',
     },
     treeAutumn: {
       img: 'sprite/tree/tree-autumn.png',
+	  tooltip: 'Autumn Tree',
     },
     treeSakura: {
       img: 'sprite/tree/tree-sakura.png',
+	  tooltip: 'Sakura Tree',
     },
     pine: {
       rename: [0, 'flatPine'],
       img: 'sprite/tree/pine.png',
+	  tooltip: 'Pine Tree',
     },
     palm: {
       rename: [0, 'flatPalm'],
@@ -2424,6 +2466,7 @@
     },
     bamboo: {
       img: 'sprite/tree-bamboo.png',
+	  tooltip: 'Bamboo Tree',
       menuScaling: new Point(.26, .26),
       scaling: new Point(.02, .02),
       offset: new Point(-.6, -.75),
@@ -2431,15 +2474,19 @@
 
     flatBush: {
       svg: 'bush',
+	  tooltip: 'Flat Bush',
     },
     flatTree: {
       svg: 'fruit',
+	  tooltip: 'Flat Tree',
     },
     flatPalm: {
       svg: 'palm',
+	  tooltip: 'Flat Palm',
     },
     flatPine: {
       svg: 'pine',
+	  tooltip: 'Flat Pine',
     },
   };
   Object.keys(asyncTreeDefinition.value).forEach(function(type) {
