@@ -1138,87 +1138,44 @@
   // disabledColor: string
   
   function addItemTooltip(item) {
-	  console.log('item?', item);
-	  console.log('item obj def?', item.objectDefinition);
 	if(item.objectDefinition == null) 
 		return;
 	var def = item.objectDefinition;
-	console.log('item def toooltip?', def.tooltip);
 	if(def.tooltip == null)
 		return;
-	item.tooltip = null;
 	item.onMouseEnter = function(event) {
-	  // Layout the tooltip above the def
 	  var fontSize = 20;
 	  var tooltipWidth = fontSize * def.tooltip.length * 0.75;
-	  //tooltipWidth = 200;
-	  var tooltipRect = new Rectangle(new Point(0,0), new Size(tooltipWidth, 25));
-	  // Create tooltip from rectangle
-	  var tooltip = new Path.Rectangle(tooltipRect, 6);
-	  tooltip.name = 'tooltip';
-	  tooltip.fillColor = 'black';
-	  //tooltip.strokeColor = 'white';
-	  // Add the tooltip to the parent (group)
-	  //item.parent.addChild(tooltip);
-	  console.log(tooltipRect);
-	  console.log('adding tooltip rect with position',tooltipRect.topLeft,'and size',tooltipRect.size);
+	  var tooltipRect = new Rectangle(new Point(0,0), new Size(null, 25));
 	  
 	  var tooltipText = new PointText(new Point(15, tooltipRect.height / 2 + 7));
-	  console.log('button item pos:',item.position);
-	  console.log('button parent pos:',item.parent.position);
-	  console.log('button parent.parent pos:',item.parent.parent.position);
 	  tooltipText.justification = 'left';
 	  tooltipText.content = def.tooltip;
 	  tooltipText.fontSize = fontSize;
 	  tooltipText.fontWeight = 'bold';
 	  tooltipText.fontFamily = 'Helvetica, Arial, sans-serif';
 	  tooltipText.fillColor = 'white';
-	  //tooltip.addChild(tooltipText);
-	  item.tooltip = tooltip;
-	  tooltip.tooltipText = tooltipText;
-	  console.log('adding tooltip',def.tooltip,'at position',item.tooltip.position);
 	  
-// .tooltip {
-  // position: relative;
-  // display: inline-block;
-  // border-bottom: 1px dotted black;
-// }
+	  var tooltipBounds = new Rectangle(
+		tooltipText.bounds.topLeft - new Point(5,5), 
+		new Size(tooltipText.bounds.width + 10, tooltipText.bounds.height + 10)
+	  );
+	  var tooltip = new Path.Rectangle(tooltipText.bounds, 6);
+	  tooltip.name = 'tooltip';
+	  tooltip.fillColor = 'black';
+	  tooltip.scale(1.2);
 
-// .tooltip .tooltiptext {
-  // visibility: hidden;
-  // width: 120px;
-  // background-color: black;
-  // color: #fff;
-  // text-align: center;
-  // border-radius: 6px;
-  // padding: 5px 0;
-
-  // /* Position the tooltip */
-  // position: absolute;
-  // z-index: 1;
-// }
-
-	  
-		var ttGroup = new Group({
-			children: [tooltip, tooltipText],
-			strokeColor: 'black',
-			applyMatrix: false,
-		});
-		ttGroup.translate([item.position.x, item.position.y])
-		tooltipLayer.addChild(ttGroup);
-		//item.addChild(ttGroup);
+	  var ttGroup = new Group({
+	  	children: [tooltip, tooltipText],
+	  	strokeColor: 'black',
+	  	applyMatrix: false,
+		name: 'current-tooltip',
+	  });
+	  ttGroup.translate([item.position.x, item.position.y])
+	  tooltipLayer.addChild(ttGroup);
 	}
-	// Create onMouseLeave event for def
 	item.onMouseLeave = function(event) {
-	  if(item.tooltip == null) {
-		return;
-	  }
-	  item.tooltip.remove();
-	  if(item.tooltip.tooltipText == null) {
-		return;
-	  }
-	  item.tooltip.tooltipText.remove();
-	  console.log('removing tooltip:', item.tooltip.tooltipText.content);
+	  tooltipLayer.children['current-tooltip'].remove();
 	}
   }
 
@@ -2202,7 +2159,9 @@
       offset: new Point(-3.5, -1.85),
 	  tooltip: 'Dock',
     },
-    airport: {},
+    airport: {
+		tooltip: 'Airport'
+	},
     center: {
       extraObject: function() {
         var baseGround = new Path.Rectangle(new Rectangle(0, 0, 12, 10), 1);
@@ -2279,7 +2238,7 @@
       scaling: new Point(.03, .03),
       menuScaling: new Point(.14, .14),
       offset: new Point(-5, -5.5),
-	  tooltip: 'Airport',
+	  tooltip: 'Airport (Blue)',
     },
     airportRed: {
       img: 'sprite/structure/airport-red.png',
@@ -2396,6 +2355,7 @@
         scaling: new Point(.026, .026),
         size: new Size(4, 6),
         offset: new Point(-1.5, -5),
+		tooltip: 'Bridge (Vertical)',
       },
       stairsStoneUp: {
         img: 'sprite/construction/stairs-stone-up.png',
@@ -2516,6 +2476,7 @@
     palm: {
       rename: [0, 'flatPalm'],
       img: 'sprite/tree/palm.png',
+	  tooltip: 'Palm Tree',
     },
     bamboo: {
       img: 'sprite/tree-bamboo.png',
@@ -2666,12 +2627,24 @@
 
   var asyncStructureDefinition = new AsyncObjectDefinition();
   asyncStructureDefinition.value = {
-    tentRound: {},
-    tentTriangle: {},
-    tentTrapezoid: {},
-    hut: {},
-    house: {},
-    building: {},
+    tentRound: {
+		tooltip: 'Tent (Round)',
+	},
+    tentTriangle: {
+		tooltip: 'Tent (Triangle)',
+	},
+    tentTrapezoid: {
+		tooltip: 'Tent (Trapezoid)',
+	},
+    hut: {
+		tooltip: 'Hut',
+	},
+    house: {
+		tooltip: 'House',
+	},
+    building: {
+		tooltip: 'Building',
+	},
     tentSprite: {
       img: 'sprite/building-tent.png',
       menuScaling: new Point(.17, .17),
