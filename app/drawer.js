@@ -293,6 +293,44 @@
         horizontal ? buttonShortDimension : buttonLongDimension);
       iconMenu.addChild(item);
       i++;
+	  
+	item.mega_tt = null;
+	// Create onMouseEnter event for def
+	item.onMouseEnter = function(event) {
+		console.log('on mouse enter for me:', this);
+	  // Layout the tooltip above the def
+	  var tt_pos = new Point(10,10);
+	  var tooltipRect = new Rectangle(tt_pos, new Size(200, 25));
+	  // Create tooltip from rectangle
+	  var tooltip = new Path.Rectangle(tooltipRect);
+	  tooltip.fillColor = 'white';
+	  tooltip.strokeColor = 'black';
+	  // Name the tooltip so we can retrieve it later
+	  tooltip.name = 'tooltip';
+	  // Add the tooltip to the parent (group)
+	  this.addChild(tooltip);
+	  
+	  var content = "dave";
+	  var tt_text = new PointText(this.position + new Point(-20, 20));
+	  console.log('this pos:',this.position);
+	  tt_text.justification = 'center';
+	  tt_text.content = 'HERE IS CONTENT',
+	  tt_text.fontSize = 12;
+	  tt_text.fontFamily = 'TTNorms, sans-serif';
+	  tt_text.fillColor = colors.text.color;
+	  tooltip.addChild(tt_text);
+	  item.mega_tt = tooltip;
+	  tooltip.mega_tt = tt_text;
+	}
+
+	// Create onMouseLeave event for def
+	item.onMouseLeave = function(event) {
+		console.log('on mouse leave for me:', this);
+	  // We retrieve the tooltip from its name in the parent node (group) then remove it
+	  //this.children['tooltip'].remove();
+	  item.mega_tt.mega_tt.remove();
+	  item.mega_tt.remove();
+	}
       return item;
     });
 
