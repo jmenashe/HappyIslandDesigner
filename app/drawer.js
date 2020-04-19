@@ -6,6 +6,7 @@
   var fixedLayer = new Layer();
   var cloudLayer = new Layer();
   var modalLayer = new Layer();
+  var tooltipLayer = new Layer();
   backgroundLayer.applyMatrix = false;
   cloudLayer.applyMatrix = false;
   fixedLayer.applyMatrix = false;
@@ -17,6 +18,8 @@
   mapIconLayer.pivot = new Point(0, 0);
   mapOverlayLayer.applyMatrix = false;
   mapOverlayLayer.pivot = new Point(0, 0);
+  tooltipLayer.applyMatrix = false;
+  tooltipLayer.pivot = new Point();
 
   var emitter = mitt();
 
@@ -1146,48 +1149,64 @@
 	item.tooltip = null;
 	item.onMouseEnter = function(event) {
 	  // Layout the tooltip above the def
-	  var fontSize = 12;
-	  var tooltipWidth = fontSize * def.tooltip.length;
+	  var fontSize = 20;
+	  var tooltipWidth = fontSize * def.tooltip.length * 0.75;
 	  //tooltipWidth = 200;
 	  var tooltipRect = new Rectangle(new Point(0,0), new Size(tooltipWidth, 25));
 	  // Create tooltip from rectangle
-	  var tooltip = new Path.Rectangle(tooltipRect);
-	  tooltip.fillColor = 'white';
-	  tooltip.strokeColor = 'black';
-	  // Name the tooltip so we can retrieve it later
+	  var tooltip = new Path.Rectangle(tooltipRect, 6);
 	  tooltip.name = 'tooltip';
+	  tooltip.fillColor = 'black';
+	  //tooltip.strokeColor = 'white';
 	  // Add the tooltip to the parent (group)
 	  //item.parent.addChild(tooltip);
 	  console.log(tooltipRect);
 	  console.log('adding tooltip rect with position',tooltipRect.topLeft,'and size',tooltipRect.size);
 	  
-	  var tooltipText = new PointText(new Point(5, tooltipRect.height / 2));
+	  var tooltipText = new PointText(new Point(15, tooltipRect.height / 2 + 7));
 	  console.log('button item pos:',item.position);
 	  console.log('button parent pos:',item.parent.position);
 	  console.log('button parent.parent pos:',item.parent.parent.position);
 	  tooltipText.justification = 'left';
 	  tooltipText.content = def.tooltip;
-	  tooltipText.fontSize = 12;
-	  tooltipText.fontFamily = 'TTNorms, sans-serif';
-	  tooltipText.fillColor = colors.text.color;
+	  tooltipText.fontSize = fontSize;
+	  tooltipText.fontWeight = 'bold';
+	  tooltipText.fontFamily = 'Helvetica, Arial, sans-serif';
+	  tooltipText.fillColor = 'white';
 	  //tooltip.addChild(tooltipText);
 	  item.tooltip = tooltip;
 	  tooltip.tooltipText = tooltipText;
 	  console.log('adding tooltip',def.tooltip,'at position',item.tooltip.position);
 	  
+// .tooltip {
+  // position: relative;
+  // display: inline-block;
+  // border-bottom: 1px dotted black;
+// }
+
+// .tooltip .tooltiptext {
+  // visibility: hidden;
+  // width: 120px;
+  // background-color: black;
+  // color: #fff;
+  // text-align: center;
+  // border-radius: 6px;
+  // padding: 5px 0;
+
+  // /* Position the tooltip */
+  // position: absolute;
+  // z-index: 1;
+// }
+
+	  
 		var ttGroup = new Group({
 			children: [tooltip, tooltipText],
-			strokeColor: 'red',
+			strokeColor: 'black',
 			applyMatrix: false,
 		});
-		ttGroup.translate([30, 0])
-		//var newLayer = new Layer();
-		//newLayer.activate();    // so that redCircle will be added to newLayer
-		//mapOverlayLayer.activate();
-		item.addChild(ttGroup);
-		ttGroup.bringToFront();
-		//newLayer.remove();      // this prevents the redCircle from being drawn
-		//project.layers.push(newLayer);  // now the redCircle is back
+		ttGroup.translate([item.position.x, item.position.y])
+		tooltipLayer.addChild(ttGroup);
+		//item.addChild(ttGroup);
 	}
 	// Create onMouseLeave event for def
 	item.onMouseLeave = function(event) {
@@ -2181,6 +2200,7 @@
       size: new Size(7, 2),
       menuScaling: new Point(.2, .2),
       offset: new Point(-3.5, -1.85),
+	  tooltip: 'Dock',
     },
     airport: {},
     center: {
@@ -2190,6 +2210,7 @@
         baseGround.position = new Point(1, 7);
         return baseGround;
       },
+	  tooltip: 'Camp Center',
     },
     townhallSprite: {
       img: 'sprite/building-townhall.png',
@@ -2203,6 +2224,7 @@
         baseGround.position = new Point(3, 5);
         return baseGround;
       },
+	  tooltip: 'Town Hall',
     },
     campsiteSprite: {
       img: 'sprite/building-campsite.png',
@@ -2210,6 +2232,7 @@
       scaling: new Point(.017, .017),
       size: new Size(4, 3),
       offset: new Point(-2, -2.6),
+	  tooltip: 'Campsite',
     },
     museumSprite: {
       img: 'sprite/building-museum.png',
@@ -2217,6 +2240,7 @@
       scaling: new Point(.028, .028),
       size: new Size(7, 4),
       offset: new Point(-3.5, -4),
+	  tooltip: 'Museum',
     },
     nookSprite: {
       img: 'sprite/building-nook.png',
@@ -2224,6 +2248,7 @@
       scaling: new Point(.020, .020),
       size: new Size(7, 4),
       offset: new Point(-3.6, -3.6),
+	  tooltip: 'Nook\'s Cranny',
     },
     ableSprite: {
       img: 'sprite/building-able.png',
@@ -2231,6 +2256,7 @@
       scaling: new Point(.021, .021),
       size: new Size(5, 4),
       offset: new Point(-2.5, -3.9),
+	  tooltip: 'Able Sisters Shop',
     },
     lighthouseSprite: {
       img: 'sprite/structure-lighthouse.png',
@@ -2238,12 +2264,14 @@
       scaling: new Point(.015, .015),
       menuScaling: new Point(.14, .14),
       offset: new Point(-1, -1.85),
+	  tooltip: 'Lighthouse',
     },
     lighthouse: {
       colorData: colors.pin,
       size: new Size([2, 2]),
       menuScaling: new Point(.3, .3),
       offset: new Point(-1, -1.6),
+	  tooltip: 'Lighthouse',
     },
     airportBlue: {
       img: 'sprite/structure/airport.png',
@@ -2251,6 +2279,7 @@
       scaling: new Point(.03, .03),
       menuScaling: new Point(.14, .14),
       offset: new Point(-5, -5.5),
+	  tooltip: 'Airport',
     },
     airportRed: {
       img: 'sprite/structure/airport-red.png',
@@ -2258,6 +2287,7 @@
       scaling: new Point(.03, .03),
       menuScaling: new Point(.14, .14),
       offset: new Point(-5, -5.5),
+	  tooltip: 'Airport (Red)',
     },
     airportYellow: {
       img: 'sprite/structure/airport-yellow.png',
@@ -2265,6 +2295,7 @@
       scaling: new Point(.03, .03),
       menuScaling: new Point(.14, .14),
       offset: new Point(-5, -5.5),
+	  tooltip: 'Airport (Yellow)',
     },
     airportGreen: {
       img: 'sprite/structure/airport-green.png',
@@ -2272,21 +2303,25 @@
       scaling: new Point(.03, .03),
       menuScaling: new Point(.14, .14),
       offset: new Point(-5, -5.5),
+	  tooltip: 'Airport (Green)',
     },
 
     //legacy
     bridgeVerticalSprite: {
       legacyCategory: 'construction',
       img: 'sprite/structure-bridge-vertical.png',
+	  tooltip: 'Vertical Bridge',
     },
     bridgeHorizontalSprite: {
       legacyCategory: 'construction',
       img: 'sprite/structure-bridge-horizontal.png',
+	  tooltip: 'Horizontal Bridge',
     },
     rampSprite: {
       legacy: 'stairsStoneLeft',
       legacyCategory: 'construction',
       img: 'sprite/structure-ramp.png',
+	  tooltip: 'Stone Stairs',
     },
   };
   Object.keys(asyncAmenitiesDefinition.value).forEach(function(type) {
@@ -2318,34 +2353,42 @@
       bridgeStoneHorizontal: {
         img: 'sprite/construction/bridge-stone-horizontal.png',
         size: new Size(6, 4),
+		tooltip: 'Bridge (Stone, Horizontal)',
       },
       bridgeStoneVertical: {
         img: 'sprite/construction/bridge-stone-vertical.png',
         size: new Size(4, 6),
+		tooltip: 'Bridge (Stone, Vertical)',
       },
       bridgeStoneTLBR: {
         img: 'sprite/construction/bridge-stone-tlbr.png',
         size: new Size(6, 6),
+		tooltip: 'Bridge (Stone, Top-Left to Bottom-Right)',
       },
       bridgeStoneTRBL: {
         img: 'sprite/construction/bridge-stone-trbl.png',
         size: new Size(6, 6),
+		tooltip: 'Bridge (Stone, Top-Right to Bottom-Left)',
       },
       bridgeWoodHorizontal: {
         img: 'sprite/construction/bridge-wood-horizontal.png',
         size: new Size(6, 4),
+		tooltip: 'Bridge (Wood, Horizontal)',
       },
       bridgeWoodVertical: {
         img: 'sprite/construction/bridge-wood-vertical.png',
         size: new Size(4, 6),
+		tooltip: 'Bridge (Wood, Vertical)',
       },
       bridgeWoodTLBR: {
         img: 'sprite/construction/bridge-wood-tlbr.png',
         size: new Size(6, 6),
+		tooltip: 'Bridge (Wood, Top-Left to Bottom-Right)',
       },
       bridgeWoodTRBL: {
         img: 'sprite/construction/bridge-wood-trbl.png',
         size: new Size(6, 6),
+		tooltip: 'Bridge (Wood, Top-Right to Bottom-Left)',
       },
       bridgeVerticalSprite: {
         img: 'sprite/structure-bridge-vertical.png',
@@ -2357,34 +2400,42 @@
       stairsStoneUp: {
         img: 'sprite/construction/stairs-stone-up.png',
         size: new Size(2, 4),
+		tooltip: 'Stairs (Stone, Up)',
       },
       stairsStoneDown: {
         img: 'sprite/construction/stairs-stone-down.png',
         size: new Size(2, 4),
+		tooltip: 'Stairs (Stone, Down)',
       },
       stairsStoneLeft: {
         img: 'sprite/construction/stairs-stone-left.png',
         size: new Size(4, 2),
+		tooltip: 'Stairs (Stone, Left)',
       },
       stairsStoneRight: {
         img: 'sprite/construction/stairs-stone-right.png',
         size: new Size(4, 2),
+		tooltip: 'Stairs (Stone, Right)',
       },
       stairsWoodUp: {
         img: 'sprite/construction/stairs-wood-up.png',
         size: new Size(2, 4),
+		tooltip: 'Stairs (Wood, Up)',
       },
       stairsWoodDown: {
         img: 'sprite/construction/stairs-wood-down.png',
         size: new Size(2, 4),
+		tooltip: 'Stairs (Wood, Down)',
       },
       stairsWoodLeft: {
         img: 'sprite/construction/stairs-wood-left.png',
         size: new Size(4, 2),
+		tooltip: 'Stairs (Wood, Left)',
       },
       stairsWoodRight: {
         img: 'sprite/construction/stairs-wood-right.png',
         size: new Size(4, 2),
+		tooltip: 'Stairs (Wood, Right)',
       },
       //legacy
       bridgeHorizontalSprite: {
@@ -2393,6 +2444,7 @@
         scaling: new Point(.026, .026),
         size: new Size(5, 3),
         offset: new Point(-2.8, -2.7),
+		tooltip: 'Bridge (Horizontal)',
       },
       rampSprite: {
         legacy: 'stairsStoneRight',
@@ -2401,6 +2453,7 @@
         scaling: new Point(.026, .026),
         size: new Size(5, 3),
         offset: new Point(-2.8, -2.7),
+		tooltip: 'Ramp',
       },
     };
   Object.keys(asyncConstructionDefinition.value).forEach(function(type) {
@@ -2527,42 +2580,55 @@
   asyncFlowerDefinition.value = {
     chrysanthemumWhite: {
       img: 'sprite/flower/chrysanthemum-white.png',
+	  tooltip: 'Chrysanthemum (White)',
     },
     hyacinthRed: {
       img: 'sprite/flower/hyacinth-red.png',
+	  tooltip: 'Hyacinth (Red)',
     },
     hyacinthWhite: {
       img: 'sprite/flower/hyacinth-white.png',
+	  tooltip: 'Hyacinth (White)',
     },
     lilyWhite: {
       img: 'sprite/flower/lily-white.png',
+	  tooltip: 'Lily (White)',
     },
     pansyPurple: {
       img: 'sprite/flower/pansy-purple.png',
+	  tooltip: 'Pansy (Purple)',
     },
     pansyRed: {
       img: 'sprite/flower/pansy-red.png',
+	  tooltip: 'Pansy (Red)',
     },
     pansyYellow: {
       img: 'sprite/flower/pansy-yellow.png',
+	  tooltip: 'Pansy (Yellow)',
     },
     poppyOrange: {
       img: 'sprite/flower/poppy-orange.png',
+	  tooltip: 'Poppy (Orange)',
     },
     poppyRed: {
       img: 'sprite/flower/poppy-red.png',
+	  tooltip: 'Poppy (Red)',
     },
     poppyWhite: {
       img: 'sprite/flower/poppy-white.png',
+	  tooltip: 'Poppy (White)',
     },
     tulipRed: {
       img: 'sprite/flower/tulip-red.png',
+	  tooltip: 'Tulip (Red)',
     },
     tulipWhite: {
       img: 'sprite/flower/tulip-white.png',
+	  tooltip: 'Tulip (White)',
     },
     tulipYellow: {
       img: 'sprite/flower/tulip-yellow.png',
+	  tooltip: 'Tulip (Yellow)',
     },
 //    weedBush: {
 //      img: 'sprite/flower/weed-bush.png',
@@ -2572,6 +2638,7 @@
 //    },
     weedClover: {
       img: 'sprite/flower/weed-clover.png',
+	  tooltip: 'Weed (Clover)',
     },
 //    weedCattail: {
 //      img: 'sprite/flower/weed-cattail.png',
@@ -2610,19 +2677,22 @@
       menuScaling: new Point(.17, .17),
       scaling: new Point(.022, .022),
       size: new Size([5,4]),
-      offset: new Point(-2.5, -3.6)
+      offset: new Point(-2.5, -3.6),
+	  tooltip: 'Tent',
     },
     playerhouseSprite: {
       img: 'sprite/building-playerhouse.png',
       menuScaling: new Point(.17, .17),
       scaling: new Point(.022, .022),
       size: new Size([5,4]),
-      offset: new Point(-2.5, -3.6)
+      offset: new Point(-2.5, -3.6),
+	  tooltip: 'Player House',
     },
     houseSprite: {
       img: 'sprite/building-house.png',
       menuScaling: new Point(.17, .17),
       scaling: new Point(.02, .02),
+	  tooltip: 'House',
     },
 //    houseFlatSprite: {
 //      img: 'sprite/building-flathouse.png',
@@ -2638,16 +2708,19 @@
       legacy: 'pine',
       legacyCategory: 'tree',
       img: 'sprite/tree-pine.png',
+	  tooltip: 'Pine Tree',
     },
     treePalmSprite: {
       legacy: 'palm',
       legacyCategory: 'tree',
       img: 'sprite/tree-palm.png',
+	  tooltip: 'Palm Tree',
     },
     treeFruitSprite: {
       legacy: 'treeOrange',
       legacyCategory: 'tree',
       img: 'sprite/tree-fruit.png',
+	  tooltip: 'Orange Tree',
     },
     // legacy
     bush: {
